@@ -4,15 +4,74 @@ import Head from 'next/head'
 import { useState } from 'react'
 import styles from './register.module.scss'
 import { useSearchParams } from 'next/navigation'
+import axios from 'axios'
 
 export default function Register() {
-  const [is_gx, setis_gx] = useState(false)
-
   const searchParams = useSearchParams()
   const [hiddenState, setHiddenState] = useState(!searchParams.get('signup') === false)
+  const [is_gx, setis_gx] = useState(false)
 
-  const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+  //login states
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginEmailhasError, setLoginEmailHasError] = useState({
+    status: false,
+    message: ''
+  })
+  const [loginPasswordhasError, setLoginPasswordHasError] = useState({
+    status: false,
+    message: ''
+  })
+
+  //signup states
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [name, setName] = useState('')
+
+  const handleLogin: React.MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault()
+    console.log(loginEmail, loginPassword)
+    try {
+      const configuration = {
+        method: 'post',
+        url: 'http://localhost:8000/login',
+        withCredentials: true,
+        data: {
+          email: loginEmail,
+          password: loginPassword
+        }
+      }
+
+      const response = await axios(configuration)
+      // setLoginStatus(true)
+      console.log(response)
+    } catch (error) {
+      // Handle errors - show an error message to the user
+      console.error('login failed', error)
+    }
+  }
+
+  const handleSignup: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
+    e.preventDefault()
+    // Here you would typically send the data to your server
+    try {
+      const configuration = {
+        method: 'post',
+        url: 'http://localhost:8000/signup',
+        data: {
+          name: name,
+          email: signupEmail,
+          password: signupPassword
+        }
+      }
+
+      const response = await axios(configuration)
+      console.log(response.data)
+      // setSignupStatus(response.data.signupStatus)
+    } catch (error) {
+      // Handle errors - show an error message to the user
+      console.error('Signup failed', error)
+    }
   }
   const handleMethodSwitch = () => {
     setHiddenState((state) => !state)
@@ -60,10 +119,25 @@ export default function Register() {
               />
             </div>
             <span className={styles.form__span}>or use email for registration</span>
-            <input type='text' placeholder='Name' className={styles.form__input} />
-            <input type='text' placeholder='Email' className={styles.form__input} />
-            <input type='password' placeholder='password' className={styles.form__input} />
-            <button className={`form__button ${styles.button} submit`} onClick={handleSubmit}>
+            <input
+              type='text'
+              placeholder='Name'
+              className={styles.form__input}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              type='text'
+              placeholder='Email'
+              className={styles.form__input}
+              onChange={(e) => setSignupEmail(e.target.value)}
+            />
+            <input
+              type='password'
+              placeholder='password'
+              className={`${styles.form__input}`}
+              onChange={(e) => setSignupEmail(e.target.value)}
+            />
+            <button className={`form__button ${styles.button} submit`} onClick={handleSignup}>
               Sign Up
             </button>
           </form>
@@ -94,10 +168,20 @@ export default function Register() {
               />
             </div>
             <span className={styles.form__span}>or use your email account</span>
-            <input type='text' placeholder='Email' className={styles.form__input} />
-            <input type='password' placeholder='password' className={styles.form__input} />
+            <input
+              type='text'
+              placeholder='Email'
+              className={styles.form__input}
+              onChange={(e) => setLoginEmail(e.target.value)}
+            />
+            <input
+              type='password'
+              placeholder='password'
+              className={styles.form__input}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
             <a className={styles.form__link}> Forgot your password?</a>
-            <button className={`form__button ${styles.button} submit`} onClick={handleSubmit}>
+            <button className={`form__button ${styles.button} submit`} onClick={handleLogin}>
               Log In
             </button>
           </form>
