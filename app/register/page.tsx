@@ -3,13 +3,16 @@
 import Head from 'next/head'
 import { useState } from 'react'
 import styles from './register.module.scss'
+import { useSearchParams } from 'next/navigation'
 
 export default function Register() {
-  const [hiddenState, setHiddenState] = useState(true)
   const [is_gx, setis_gx] = useState(false)
 
-  const handleSubmit = (e: Event) => {
-    e.preventDefault()
+  const searchParams = useSearchParams()
+  const [hiddenState, setHiddenState] = useState(!searchParams.get('signup') === false)
+
+  const handleSubmit: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault()
   }
   const handleMethodSwitch = () => {
     setHiddenState((state) => !state)
@@ -105,9 +108,14 @@ export default function Register() {
           }`}
           id='switch-cnt'
         >
-          <div className={`${styles.switch__circle} ${!hiddenState ? styles.is_txm : ''}`} id='circle-1'></div>
           <div
-            className={`${styles.switch__circle} ${styles.switch__circle__t} ${!hiddenState ? styles.is_txr : ''}`}
+            className={`${styles.switch__circle} ${!hiddenState ? styles.is_txm : ''}`}
+            id='circle-1'
+          ></div>
+          <div
+            className={`${styles.switch__circle} ${styles.switch__circle__t} ${
+              !hiddenState ? styles.is_txr : ''
+            }`}
             id='circle-2'
           ></div>
 

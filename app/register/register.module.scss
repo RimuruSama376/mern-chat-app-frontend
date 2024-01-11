@@ -151,13 +151,11 @@ $transition: 1.25s;
 /**/
 
 .a_container {
-  //   position: relative;
   justify-self: flex-end;
   z-index: 100;
   left: calc(100% - 600px);
 }
 .b_container {
-  //   position: relative;
   left: calc(100% - 600px);
   z-index: 0;
 }
@@ -245,7 +243,7 @@ $transition: 1.25s;
   transform-origin: left;
 }
 .is_txl {
-  left: 0;
+  left: -40px;
   transition: $transition;
   transform-origin: right;
 }
