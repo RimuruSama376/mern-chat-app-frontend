@@ -1,5 +1,3 @@
-'use client'
-
 import Head from 'next/head'
 import { useState } from 'react'
 import styles from './register.module.scss'
@@ -86,10 +84,7 @@ export default function Register() {
         <title>Register Page</title>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <meta charSet='utf-8' />
-        <link
-          href='https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap'
-          rel='stylesheet'
-        />
+        
       </Head>
 
       <div className={styles.main}>
