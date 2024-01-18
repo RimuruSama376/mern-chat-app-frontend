@@ -3,8 +3,19 @@ import { useState } from 'react'
 import styles from './register.module.scss'
 import { useSearchParams } from 'next/navigation'
 import axios from 'axios'
+import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from 'next/router'
 
 export default function Register() {
+  const user = useSelector((state: any) => state.user)
+  const dispatch = useDispatch()
+  const router = useRouter()
+  console.log(user)
+  //logic to check if the user is logged in or not
+  if (user.isLoggedIn) {
+    router.push('/')
+  }
+
   const searchParams = useSearchParams()
   const [hiddenState, setHiddenState] = useState(!searchParams.get('signup') === false)
   const [is_gx, setis_gx] = useState(false)
@@ -84,7 +95,6 @@ export default function Register() {
         <title>Register Page</title>
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <meta charSet='utf-8' />
-        
       </Head>
 
       <div className={styles.main}>

@@ -1,8 +1,16 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsLoggedIn } from '@/store/userSlice'
+import { useRouter } from 'next/router'
 
 export default function Home() {
   const [message, setMessage] = useState('')
+  const user = useSelector((state: any) => state.user)
+  const dispatch = useDispatch()
+  const router = useRouter()
+
+
   const sendRequest = async () => {
     try {
       const configuration = {
@@ -20,18 +28,29 @@ export default function Home() {
       console.error('login failed', error)
     }
   }
+
   useEffect(() => {
     const test = async () => {
       try {
-        const response = await fetch('http://localhost:8000')
-        const data = await response.json()
-        console.log(data)
+        const configuration = {
+          method: 'get',
+          url: 'http://localhost:8000/auth',
+          withCredentials: true
+        }
+
+        const response = await axios(configuration)
+        setMessage(response.data.message)
+        console.log(response)
+        dispatch(setIsLoggedIn({ status: response.data.status }))
       } catch (err) {
         console.log(err)
+        dispatch(setIsLoggedIn({ status: false }))
+        router.push('/register')
       }
     }
     test()
   }, [])
+
   return (
     <>
       <h1>My next app</h1>
