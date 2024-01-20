@@ -1,28 +1,47 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './register.module.scss'
-import { useSearchParams } from 'next/navigation'
-import axios from 'axios'
+import { redirect, useSearchParams } from 'next/navigation'
+import axios, { isAxiosError } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
+import { setIsLoggedIn, setUserEmail, setUserName } from '@/store/userSlice'
+
+import { getUserInfo } from '@/helper/getUserInfo'
 
 export default function Register() {
   const user = useSelector((state: any) => state.user)
   const dispatch = useDispatch()
   const router = useRouter()
   console.log(user)
+
+  useEffect(() => {
+    const test = async () => {
+      const response = await getUserInfo()
+      if (!isAxiosError(response)) {
+        dispatch(setIsLoggedIn({ status: response.status }))
+        console.log(response)
+      } else {
+        console.log('user not logged in')
+      }
+    }
+    if (!user.isLoggedIn) test()
+  }, [])
+
   //logic to check if the user is logged in or not
-  if (user.isLoggedIn) {
-    router.push('/')
-  }
+  useEffect(() => {
+    if (user.isLoggedIn) {
+      router.push('/')
+    }
+  }, [user.isLoggedIn])
 
   const searchParams = useSearchParams()
   const [hiddenState, setHiddenState] = useState(!searchParams.get('signup') === false)
   const [is_gx, setis_gx] = useState(false)
 
   //login states
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
+  const loginEmailRef = useRef<HTMLInputElement>(null)
+  const loginPasswordRef = useRef<HTMLInputElement>(null)
   const [loginEmailhasError, setLoginEmailHasError] = useState({
     status: false,
     message: ''
@@ -33,27 +52,29 @@ export default function Register() {
   })
 
   //signup states
-  const [signupEmail, setSignupEmail] = useState('')
-  const [signupPassword, setSignupPassword] = useState('')
-  const [name, setName] = useState('')
+  const signupEmailRef = useRef<HTMLInputElement>(null)
+  const signupPasswordRef = useRef<HTMLInputElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   const handleLogin: React.MouseEventHandler<HTMLButtonElement> = async (event) => {
     event.preventDefault()
-    console.log(loginEmail, loginPassword)
+    console.log(loginEmailRef?.current?.value, loginPasswordRef?.current?.value)
     try {
       const configuration = {
         method: 'post',
         url: 'http://localhost:8000/login',
         withCredentials: true,
         data: {
-          email: loginEmail,
-          password: loginPassword
+          email: loginEmailRef?.current?.value,
+          password: loginPasswordRef?.current?.value
         }
       }
 
       const response = await axios(configuration)
-      // setLoginStatus(true)
-      console.log(response)
+      dispatch(setIsLoggedIn({ status: response.data.status }))
+      dispatch(setUserEmail({ emaii: response.data.email }))
+      dispatch(setUserName({ name: response.data.name }))
+      console.log(response.data.status)
     } catch (error) {
       // Handle errors - show an error message to the user
       console.error('login failed', error)
@@ -68,9 +89,9 @@ export default function Register() {
         method: 'post',
         url: 'http://localhost:8000/signup',
         data: {
-          name: name,
-          email: signupEmail,
-          password: signupPassword
+          name: nameRef?.current?.value,
+          email: signupEmailRef?.current?.value,
+          password: signupPasswordRef?.current?.value
         }
       }
 
@@ -124,23 +145,18 @@ export default function Register() {
               />
             </div>
             <span className={styles.form__span}>or use email for registration</span>
-            <input
-              type='text'
-              placeholder='Name'
-              className={styles.form__input}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <input type='text' placeholder='Name' className={styles.form__input} ref={nameRef} />
             <input
               type='text'
               placeholder='Email'
               className={styles.form__input}
-              onChange={(e) => setSignupEmail(e.target.value)}
+              ref={signupEmailRef}
             />
             <input
               type='password'
               placeholder='password'
               className={`${styles.form__input}`}
-              onChange={(e) => setSignupEmail(e.target.value)}
+              ref={signupPasswordRef}
             />
             <button className={`form__button ${styles.button} submit`} onClick={handleSignup}>
               Sign Up
@@ -177,13 +193,13 @@ export default function Register() {
               type='text'
               placeholder='Email'
               className={styles.form__input}
-              onChange={(e) => setLoginEmail(e.target.value)}
+              ref={loginEmailRef}
             />
             <input
               type='password'
               placeholder='password'
               className={styles.form__input}
-              onChange={(e) => setLoginPassword(e.target.value)}
+              ref={loginPasswordRef}
             />
             <a className={styles.form__link}> Forgot your password?</a>
             <button className={`form__button ${styles.button} submit`} onClick={handleLogin}>
