@@ -4,44 +4,32 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setIsLoggedIn, setUserEmail, setUserName } from '@/store/userSlice'
 import { useRouter } from 'next/router'
 import { getUserInfo } from '../helper/getUserInfo'
-import { GetServerSideProps } from 'next'
-import { redirect } from 'next/navigation'
 import UserInfoHeader from '@/components/UserInfoHeader'
-
-// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-//   const response = await getUserInfo()
-//   if (isAxiosError(response)) {
-//     console.log('user not logged in')
-//     return {
-//       props: {}
-//     }
-//   }
-//   const props = {
-//     name: response.name,
-//     email: response.email,
-//     isLogginIn: true
-//   }
-//   console.log(props)
-//   return {
-//     props: props
-//   }
-// }
-
+interface User {
+  name: string
+  email: string
+  _id: string
+}
 export default function Home() {
   const [message, setMessage] = useState('')
   const user = useSelector((state: any) => state.user)
   const dispatch = useDispatch()
   const router = useRouter()
+  const [friends, setFriends] = useState<User[]>([])
 
-  const sendRequest = async () => {
+  const getFriends = async () => {
     try {
-      const response = await getUserInfo()
-      setMessage(response.message)
-      console.log(response)
+      const configuration = {
+        method: 'get',
+        url: 'http://localhost:8000/get-friends',
+        withCredentials: true
+      }
+
+      const response = await axios(configuration)
+      setFriends(response.data)
     } catch (error) {
       // Handle errors - show an error message to the user
-      setMessage('You are not autorized')
-      console.error('login failed')
+      return error
     }
   }
 
@@ -62,11 +50,19 @@ export default function Home() {
     }
     if (!user.isLoggedIn) test()
   }, [])
-
+  if (!user.isLoggedIn) return <></>
   return (
     <>
-      <UserInfoHeader/>
-      {message}
+      <UserInfoHeader />
+      <button onClick={getFriends}>get</button>
+      <br></br>
+      {friends.length ? (
+        friends.map((f) => {
+          return <span style={{ display: 'block' }}>{f.name}</span>
+        })
+      ) : (
+        <></>
+      )}
     </>
   )
 }
